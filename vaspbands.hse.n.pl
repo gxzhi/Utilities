@@ -2,9 +2,16 @@
 #changed from vaspbands.pl of ccao
 #used for n kpoints per path
 #
+$num_args = $#ARGV + 1;
+if ($num_args != 2) {
+    printf(STDERR "Usage: vaspbands.hse.n.pl \${Kpoints_Per_Path} \${trivialhead} > bands.dat\n");
+    exit;
+}
 
-$Kpoints_Per_Path=30;
-$trivalhead=193;        #how many trival kpts at beginning  which has nothing to do with bnds
+$Kpoints_Per_Path=$ARGV[0];
+$trivalhead=$ARGV[1];        #how many trival kpts at beginning  which has nothing to do with bnds
+
+printf(STDERR "Kpoints_Per_Path =%6d\ntrivalhead       =%6d\n", $Kpoints_Per_Path, $trivalhead);
 
 use Carp;
 open(FILE, "EIGENVAL");
