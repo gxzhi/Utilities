@@ -1,24 +1,27 @@
 #!/usr/bin/perl
-
+#changed from vaspbands.pl of ccao
+#used for 100 kpoints per path
+#
+use Carp;
 open(FILE, "EIGENVAL");
 
-$_=<FILE>;
+$_=<FILE>;		#read a line
 @tmp=split;
 $nspin=$tmp[3];
-for($i=0;$i<4;$i++) {
+for($i=0;$i<4;$i++) {	#skip 4 lines
   $_=<FILE>;
 }
 
-$_=<FILE>;
+$_=<FILE>;		#read the 6th line
 @tmp=split;
-$nkpts=$tmp[1];
-$nbnds=$tmp[2];
+$nkpts=$tmp[1];		#number of k-points
+$nbnds=$tmp[2];		#nubmer of bands
 
 for($i=0;$i<$nkpts;$i++) {
-  $_=<FILE>;
-  $_=<FILE>;
+  $_=<FILE>;		#skip the line contains nothing
+  $_=<FILE>;		#skip the line of the coordinate of the k-point
   for($j=0;$j<$nbnds;$j++) {
-    $_=<FILE>;
+    $_=<FILE>;		#read the bands one by one
     @tmp=split;
     if($nspin==1) {
       $te[$j]=$tmp[1];
@@ -43,11 +46,11 @@ while($_=<FILE>) {
     for($i=1;$i<$nkpts;$i++) {
       $_=<FILE>;
       @knew=split;
-      if ($i%100==0) {
-        $kpt[$i]=$kpt[$i-1];
+      if($i%100==0) {
+         $kpt[$i]=$kpt[$i-1];
       }
-      else {
-        $kpt[$i]=$kpt[$i-1]+sqrt(($knew[0]-$kold[0])**2+($knew[1]-$kold[1])**2+($knew[2]-$kold[2])**2);
+      else{
+         $kpt[$i]=$kpt[$i-1]+sqrt(($knew[0]-$kold[0])**2+($knew[1]-$kold[1])**2+($knew[2]-$kold[2])**2);
       }
       @kold=@knew;
     }
@@ -61,6 +64,13 @@ for($i=0;$i<$nbnds;$i++) {
     }
     else {
       printf("%12.9f  %12.9f  %12.9f\n",$kpt[$j],$ebnds[$j][$i*2],$ebnds[$j][$i*2+1]);
+    }
+    if(($j+1)%100==0){
+       if($i==0){
+	       $xn=($j+1)/100;
+           printf(STDERR "x%d = %10.7f\n", $xn, $kpt[$j]);
+       }
+      printf("\n");
     }
   }
   printf("\n");

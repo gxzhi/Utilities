@@ -1,12 +1,10 @@
 #!/usr/bin/perl
 #changed from vaspbands.pl of ccao
-#used for n kpoints per path
-#
-
-$Kpoints_Per_Path=20;
-
+#used for 100 kpoints per path
+#changed for hybrid functional calc, "trivalhead" ticket is added
 use Carp;
 open(FILE, "EIGENVAL");
+$trivalhead=163;		#how many trival kpts at beginning  which has nothing to do with bnds
 
 $_=<FILE>;		#read a line
 @tmp=split;
@@ -17,8 +15,13 @@ for($i=0;$i<4;$i++) {	#skip 4 lines
 
 $_=<FILE>;		#read the 6th line
 @tmp=split;
-$nkpts=$tmp[1];		#number of k-points
+$nkpts=$tmp[1]-$trivalhead;		#number of k-points
 $nbnds=$tmp[2];		#nubmer of bands
+
+$LinesToSkip=$trivalhead*($nbnds+2);
+for($i=0;$i<$LinesToSkip;$i++) {	#skip lines of trival kpts
+  $_=<FILE>;
+}
 
 for($i=0;$i<$nkpts;$i++) {
   $_=<FILE>;		#skip the line contains nothing
@@ -43,13 +46,17 @@ open(FILE, "OUTCAR");
 
 while($_=<FILE>) {
   if(/k-points in units of 2pi\/SCALE/) {
+    $LinesToSkip=$trivalhead;
+    for($i=0;$i<$LinesToSkip;$i++) {        #skip lines of trival kpts
+	      $_=<FILE>;
+    }
     $_=<FILE>;
     @kold=split;
     $kpt[0]=0;
     for($i=1;$i<$nkpts;$i++) {
       $_=<FILE>;
       @knew=split;
-      if($i%$Kpoints_Per_Path==0) {
+      if($i%100==0) {
          $kpt[$i]=$kpt[$i-1];
       }
       else{
@@ -68,9 +75,9 @@ for($i=0;$i<$nbnds;$i++) {
     else {
       printf("%12.9f  %12.9f  %12.9f\n",$kpt[$j],$ebnds[$j][$i*2],$ebnds[$j][$i*2+1]);
     }
-    if(($j+1)%$Kpoints_Per_Path==0){
+    if(($j+1)%100==0){
        if($i==0){
-	       $xn=($j+1)/$Kpoints_Per_Path;
+	       $xn=($j+1)/100;
            printf(STDERR "x%d = %10.7f\n", $xn, $kpt[$j]);
        }
       printf("\n");
