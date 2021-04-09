@@ -1,15 +1,40 @@
 #!/usr/bin/perl
-#changed from vaspbands.pl of ccao
+#fork from vaspbands.pl of ccao
 #used for n kpoints per path
 #
+# Usage: 
+#           vaspbands.hse.n.pl \${Kpoints_Per_Path} \${trivialhead} > bands.dat
+#
+# ${trivalhead} is number of kpt should be ignored at the head of EIGENVAL file,
+# it is used for hse|mbj band calcualtion, ignore the k-points mesh not for bnd.
+#
+
+use Scalar::Util qw(looks_like_number);
+
 $num_args = $#ARGV + 1;
-if ($num_args != 2) {
-    printf(STDERR "Usage: vaspbands.hse.n.pl \${Kpoints_Per_Path} \${trivialhead} > bands.dat\n");
-    exit;
+
+if ( $num_args > 0 ) {
+    for($i=0;$i<$num_args;$i++){
+        if ( ! looks_like_number($ARGV[$i])){
+            printf(STDERR "Usage: vaspbands.hse.n.pl \${Kpoints_Per_Path} \${trivialhead} > bands.dat\n");
+            exit;
+        }
+    }
 }
 
-$Kpoints_Per_Path=$ARGV[0];
-$trivalhead=$ARGV[1];        #how many trival kpts at beginning  which has nothing to do with bnds
+if ($num_args < 2) {
+    $trivalhead=0;
+}
+else{
+    $trivalhead=$ARGV[1];        #how many trival kpts at beginning  which has nothing to do with bnds
+}
+
+if ($num_args < 1) {
+    $Kpoints_Per_Path=100;
+}
+else{
+    $Kpoints_Per_Path=$ARGV[0];
+}
 
 printf(STDERR "Kpoints_Per_Path =%6d\ntrivalhead       =%6d\n", $Kpoints_Per_Path, $trivalhead);
 
